@@ -1,0 +1,31 @@
+# Ignore Python virtual environments
+penv/
+__pycache__/
+
+# Ignore compiled Python files
+*.pyc
+*.pyo
+*.pyd
+
+# Ignore log files
+*.log
+
+# Ignore checkpoints or temporary data
+checkpoints/
+*.tmp
+*.bak
+
+# Ignore pytest caches
+pytest_cache/
+.cache/
+
+# Ignore system-specific files
+.DS_Store
+Thumbs.db
+
+# Ignore specific IDE/editor files
+.idea/
+.vscode/
+
+# Ignore unnecessary config
+*.cfg
