@@ -4,7 +4,6 @@ from datetime import datetime
 from .api_client import GovUKAPIClient, APIError
 from .progress import ScanProgress
 from .checkpoint import CheckpointManager
-import time
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -146,21 +145,15 @@ class GovUKCrawler:
             return ""
 
     def crawl_section(self, section_path: str) -> Dict[str, Any]:
-        max_retries = 3
-        retry_delay = 5  # seconds
+        """
+        Crawl a specific section of GOV.UK content.
         
-        for attempt in range(max_retries):
-            try:
-                return self._do_crawl_section(section_path)
-            except APIError as e:
-                if attempt < max_retries - 1:
-                    logger.warning(f"Attempt {attempt + 1} failed, retrying in {retry_delay}s: {str(e)}")
-                    time.sleep(retry_delay)
-                    retry_delay *= 2  # Exponential backoff
-                else:
-                    raise
-
-    def _do_crawl_section(self, section_path: str) -> Dict[str, Any]:
+        Args:
+            section_path: The path to start crawling from
+        
+        Returns:
+            Dict containing the crawl results
+        """
         logger.info(f"Starting crawl of section: {section_path}")
         try:
             content = self.api_client.get_content(section_path)

@@ -1,6 +1,6 @@
 import requests
 import logging
-from typing import Optional, Dict, Any, List
+from typing import Optional, Dict, Any
 from urllib.parse import urljoin
 from .rate_limiter import RateLimiter
 
@@ -16,9 +16,9 @@ class GovUKAPIClient:
     Client for interacting with the GOV.UK Content API.
     Handles rate-limited requests and response parsing.
     """
-    def __init__(self, rate_limit: float = 10.0):
+    def __init__(self):
         self.base_url = "https://www.gov.uk/api/content"
-        self.rate_limiter = RateLimiter(rate_limit)
+        self.rate_limiter = RateLimiter()
         self.session = requests.Session()
         self.session.headers.update({
             'User-Agent': 'GOV.UK-Content-Mapper/1.0',
@@ -102,17 +102,21 @@ class GovUKAPIClient:
             return True
         return False
 
-    @RateLimiter()
-    def get_related_links(self, content: Dict[str, Any]) -> List[str]:
-        """Extract related content links from content data"""
+    def get_related_links(self, content: Dict[str, Any]) -> list:
+        """
+        Extract related links from content.
+        
+        Args:
+            content: The API response dictionary
+        
+        Returns:
+            list: List of related content paths
+        """
         links = []
-        try:
-            # Extract links from content relationships
-            for link_type in ["related_items", "related_guides", "related_content"]:
-                if link_type in content.get("links", {}):
-                    for item in content["links"][link_type]:
-                        if "base_path" in item:
-                            links.append(item["base_path"])
-            return links
-        except (KeyError, TypeError):
-            return []
+        # Extract links from various possible locations in the content
+        if "links" in content:
+            for link_type, link_list in content["links"].items():
+                for link in link_list:
+                    if "base_path" in link:
+                        links.append(link["base_path"])
+        return links 

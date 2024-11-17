@@ -6,7 +6,6 @@ from pybloom_live import BloomFilter
 from .crawler import GovUKCrawler
 from .progress import ScanProgress
 from .checkpoint import CheckpointManager
-import time
 
 logger = logging.getLogger(__name__)
 
@@ -46,20 +45,7 @@ class OptimisedCrawler(GovUKCrawler):
         if "/guidance/" in url:
             base_priority -= 50
             
-        # Add more sophisticated priority calculation
-        priority = max(1, base_priority)
-        
-        # Consider update frequency
-        if url in self.update_frequency:
-            frequency_score = self.update_frequency[url]
-            priority -= frequency_score * 100
-            
-        # Consider page importance metrics
-        if url in self.page_metrics:
-            importance_score = self.page_metrics[url].get('importance', 0)
-            priority -= importance_score * 50
-            
-        return max(1, priority)
+        return max(1, base_priority)  # Ensure priority is at least 1
         
     def add_url_to_queue(self, url: str, content_type: str = None, depth: int = 0) -> None:
         """Add URL to queue with appropriate priority if not seen."""
@@ -139,11 +125,3 @@ class OptimisedCrawler(GovUKCrawler):
                 self.url_queue.put((priority, url, depth))
                 
         return True 
-        
-    def _manage_memory(self):
-        """Implement memory management for long runs"""
-        if len(self.visited_urls) > self.max_urls_in_memory:
-            # Persist older URLs to disk
-            self._persist_urls_to_disk(list(self.visited_urls)[:10000])
-            # Clear from memory
-            self.visited_urls = set(list(self.visited_urls)[10000:])
